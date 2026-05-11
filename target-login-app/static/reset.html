@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>密码重置</title>
+    <link rel="stylesheet" href="/static/style.css" />
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="card">
+        <h1>密码重置</h1>
+        <p class="sub">请求重置后，本地演示会在响应中返回演示用 token（真实环境应邮件发送）</p>
+        <div id="msg" class="msg"></div>
+        <h2 style="font-size: 1rem; margin: 1rem 0 0.5rem">1. 请求重置</h2>
+        <form id="reqForm">
+          <label for="email">注册邮箱</label>
+          <input id="email" type="email" required />
+          <button type="submit" class="btn">发送重置请求</button>
+        </form>
+        <pre id="demoOut" class="demo" style="display: none; margin-top: 1rem"></pre>
+        <h2 style="font-size: 1rem; margin: 1.25rem 0 0.5rem">2. 确认新密码</h2>
+        <form id="resetForm">
+          <label for="token">重置令牌</label>
+          <input id="token" placeholder="从上方演示字段复制" />
+          <label for="new_password">新密码</label>
+          <input id="new_password" type="password" autocomplete="new-password" />
+          <label for="confirm_password">确认新密码</label>
+          <input id="confirm_password" type="password" autocomplete="new-password" />
+          <button type="submit" class="btn">重置密码</button>
+        </form>
+        <div class="nav"><a href="/login.html">返回登录</a></div>
+      </div>
+    </div>
+    <script>
+      const params = new URLSearchParams(location.search);
+      const preset = params.get("token");
+      if (preset) document.getElementById("token").value = preset;
+
+      const msgEl = document.getElementById("msg");
+      function showMsg(text, ok) {
+        msgEl.textContent = text;
+        msgEl.className = "msg show " + (ok ? "ok" : "err");
+      }
+
+      document.getElementById("reqForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const email = document.getElementById("email").value.trim();
+        const r = await fetch("/api/reset-request", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email }),
+        });
+        const j = await r.json();
+        if (j.code === 0) {
+          showMsg(j.message, true);
+          const out = document.getElementById("demoOut");
+          out.style.display = "block";
+          out.textContent = JSON.stringify(j, null, 2);
+          if (j.data && j.data.demo_reset_token) {
+            document.getElementById("token").value = j.data.demo_reset_token;
+          }
+        } else {
+          showMsg(j.message, false);
+        }
+      });
+
+      document.getElementById("resetForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const body = {
+          token: document.getElementById("token").value.trim(),
+          new_password: document.getElementById("new_password").value,
+          confirm_password: document.getElementById("confirm_password").value,
+        };
+        const r = await fetch("/api/reset", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+        const j = await r.json();
+        if (j.code === 0) {
+          showMsg(j.message + " — 即将跳转登录页", true);
+          setTimeout(() => (location.href = "/login.html"), 1000);
+        } else {
+          showMsg(j.message, false);
+        }
+      });
+    </script>
+  </body>
+</html>

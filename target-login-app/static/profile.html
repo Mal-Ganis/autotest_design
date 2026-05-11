@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>个人资料</title>
+    <link rel="stylesheet" href="/static/style.css" />
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="card">
+        <h1>个人资料</h1>
+        <p class="sub">需有效会话（Cookie）</p>
+        <div id="msg" class="msg"></div>
+        <pre id="data" class="demo" style="display: none"></pre>
+        <button type="button" class="btn" id="logout">退出登录</button>
+        <div class="nav"><a href="/">返回首页</a></div>
+      </div>
+    </div>
+    <script>
+      const msgEl = document.getElementById("msg");
+      const dataEl = document.getElementById("data");
+      function showMsg(text, ok) {
+        msgEl.textContent = text;
+        msgEl.className = "msg show " + (ok ? "ok" : "err");
+      }
+      async function load() {
+        const r = await fetch("/api/profile", { credentials: "same-origin" });
+        const j = await r.json();
+        if (j.code !== 0) {
+          showMsg(j.message + " — 请先登录", false);
+          setTimeout(() => (location.href = "/login.html"), 1200);
+          return;
+        }
+        dataEl.style.display = "block";
+        dataEl.textContent = JSON.stringify(j.data, null, 2);
+      }
+      document.getElementById("logout").addEventListener("click", async () => {
+        await fetch("/api/logout", {
+          method: "POST",
+          credentials: "same-origin",
+        });
+        location.href = "/login.html";
+      });
+      load();
+    </script>
+  </body>
+</html>

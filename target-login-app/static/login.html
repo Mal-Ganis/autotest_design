@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>登录</title>
+    <link rel="stylesheet" href="/static/style.css" />
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="card">
+        <h1>登录</h1>
+        <p class="sub">连续失败 5 次将锁定 30 分钟</p>
+        <div id="msg" class="msg"></div>
+        <form id="form">
+          <label for="username">用户名</label>
+          <input id="username" name="username" autocomplete="username" required />
+          <label for="password">密码</label>
+          <input id="password" name="password" type="password" autocomplete="current-password" required />
+          <button type="submit" class="btn">登录</button>
+        </form>
+        <div class="nav">
+          <a href="/register.html">注册</a> ·
+          <a href="/reset.html">忘记密码</a>
+        </div>
+      </div>
+    </div>
+    <script>
+      const msgEl = document.getElementById("msg");
+      function showMsg(text, ok) {
+        msgEl.textContent = text;
+        msgEl.className = "msg show " + (ok ? "ok" : "err");
+      }
+      document.getElementById("form").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const body = {
+          username: document.getElementById("username").value.trim(),
+          password: document.getElementById("password").value,
+        };
+        const r = await fetch("/api/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "same-origin",
+          body: JSON.stringify(body),
+        });
+        const j = await r.json();
+        if (j.code === 0) {
+          showMsg("登录成功，正在跳转…", true);
+          setTimeout(() => (location.href = "/profile.html"), 500);
+        } else {
+          showMsg(j.message, false);
+        }
+      });
+    </script>
+  </body>
+</html>

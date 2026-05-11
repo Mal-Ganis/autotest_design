@@ -1,0 +1,182 @@
+================================================================================
+AutoTestDesign 期末项目 — 接力式四人分工方案（低日常沟通版）
+依据：《要求.txt》（2026年5月8日更新版）。作业要求的 PDF、PPT、视频仍须全组在串联完成后补齐。
+================================================================================
+
+一、为什么用「接力」而不是「紧耦合协作」
+--------------------------------------------------------------------------------
+  • 模块之间不互相 import，只约定「读入哪个 JSON、写出哪个 JSON」。
+  • 每人只维护少量 .py；上游未就绪时，用 data/mock/ 下固定样例即可独立开发与验收。
+  • 全组只在「冻结 JSON 字段表」和「最后 launcher 串联」两次需要短会对齐；中间以
+    文档与样例文件为准。
+
+与《新建 文本文档.txt》对齐的三条铁律：
+  1）一人一（或少数几个）脚本；2）文件即接口（data/*.json）；3）Mock 先行。
+
+
+二、仓库建议目录（实现时由一人建骨架即可）
+--------------------------------------------------------------------------------
+  autotest_design/
+    launcher.py              # 最后由指定人完成：按顺序 subprocess 或顺序 import 仅 launcher
+    README.md
+    requirements.txt
+    .env.example               # API Key 等，勿提交真密钥
+    contracts/
+      SCHEMA.md                # 全员必读：每个 JSON 的字段含义与示例（冻结后少改）
+    scripts/                   # 或平铺在根目录，组内二选一，下文以 scripts/ 为例
+      ingest.py
+      structure.py
+      risk_prioritize.py
+      coverage_items.py
+      strategies_and_prompts.py
+      blackbox_generate.py
+      traceability_and_analysis.py
+      interactive_review.py    # 满足「设计者可交互修订」的最低实现：CLI 改 JSON
+      export_artifacts.py
+    data/
+      mock/                    # 各成员自建上游假数据，供别人不等你就开写
+      work/                    # 运行产物，可 gitignore
+  tests_target/                # 对「自选目标应用」的自动化脚本（JUnit/PyTest/Selenium 等）
+    ...                        # 由负责执行的成员维护，读取 export 出的用例 JSON
+
+
+三、流水线顺序（JSON 接力关系）
+--------------------------------------------------------------------------------
+  步骤  脚本名                      读入                          写出（示例文件名）
+  ----  --------------------------  ----------------------------  ----------------------------------
+  S0    （人工/Mock）               —                             data/mock/00_input_raw.json
+  S1    ingest.py                   00_input_raw.json             data/work/01_ingested.json
+  S2    structure.py                01_ingested.json              data/work/02_structured.json
+  S3    risk_prioritize.py          02_structured.json            data/work/03_with_risk.json
+  S4    coverage_items.py           03_with_risk.json             data/work/04_coverage_items.json
+  S5    strategies_and_prompts.py   04_coverage_items.json        data/work/05_strategies.json
+  S6    blackbox_generate.py        05_strategies.json            data/work/06_test_cases_draft.json
+  S7    traceability_and_analysis.py 06_test_cases_draft.json     data/work/07_traceability.json
+  S8    interactive_review.py       07_traceability.json          data/work/08_reviewed.json
+  S9    export_artifacts.py         08_reviewed.json              data/work/09_export_cases.json
+                                                                  data/work/09_export_risk.csv（可选）
+
+  launcher.py：依次调用 S1…S9；支持参数如 --start-from risk_prioritize 从中间调试；
+  任一步失败打印清晰错误并 exit(1)。
+
+说明：
+  • S4～S7 对应作业「Mainly」链条的「覆盖项 → 策略与方法 → 用例 → 可追溯 → 提示 →
+    结果分析映射」的**可落盘**版本；字段名在 contracts/SCHEMA.md 写死即可。
+  • S8 为「交互式审查」的**低耦合**实现：菜单式编辑/合并 JSON（不必先做复杂 GUI）；
+    若日后加 Web UI，仍建议底层读写 08_reviewed.json，不改变接力契约。
+
+
+四、JSON 契约（须在 Week1 末冻结 v1，之后只增字段不删字段）
+--------------------------------------------------------------------------------
+  全员只认 contracts/SCHEMA.md，不写进 SCHEMA 的字段视为不存在。最低限度应约定：
+
+  • 每条「需求」含：req_id, raw_text, source（csv|text|stdin）, …
+  • 结构化后含：input_fields[], data_ranges[], conditions[], expected_actions[]（对齐 FR1.1）
+  • 风险层含：risk_score, test_priority（High|Medium|Low）（FR2.0）
+  • 覆盖项：coverage_id, description, linked_req_ids[]
+  • 策略：strategy_id, technique（EP|BVA|DT|…）, linked_coverage_ids[], prompt_notes
+  • 用例：case_id, steps[], test_data, expected_result（可为空待神谕）, links{req,coverage,strategy}
+  • 可追溯：analysis 段保存「用例 ↔ 覆盖项 ↔ 策略」映射及一次「改进记录」数组
+
+  具体 JSON 样例：由「契约负责人」在 mock 中放 2～3 条完整链路的迷你样例即可。
+
+
+五、四人分工（每人几个小 .py + 文档责任）
+--------------------------------------------------------------------------------
+约定角色名 P1～P4，组内自行对应姓名。
+
+  【P1】需求摄入与结构化 — FR 1.0 + FR 1.1
+    负责脚本：
+      scripts/ingest.py
+      scripts/structure.py
+    另负责：contracts/SCHEMA.md 初稿（S0→S2 段）；data/mock/ 下提供 00、01、02 的样例。
+    验收：
+      python scripts/ingest.py --in ... --out data/work/01_ingested.json 可独立跑通；
+      python scripts/structure.py 读 01 写 02，mock 可独立跑通；
+      不依赖下游任何脚本。
+
+  【P2】风险与覆盖项识别 — FR 2.0 + Mainly 前半
+    负责脚本：
+      scripts/risk_prioritize.py
+      scripts/coverage_items.py
+    另负责：《风险分析报告》PDF 主笔；测试计划中「范围、测试项、风险相关套件设计」初稿。
+    验收：
+      读 02 写 03：每条需求必有 risk_score 与 test_priority；
+      读 03 写 04：至少列出可解释的 coverage_items，带 linked_req_ids；
+      仅用 mock 的 02.json 可独立跑通两脚本。
+
+  【P3】策略、黑盒生成、提示侧 — FR 3.0 + Mainly 中段
+    负责脚本：
+      scripts/strategies_and_prompts.py
+      scripts/blackbox_generate.py
+    另负责：《详细测试设计与执行文档》中「黑盒多种技术、用例设计、覆盖说明」主笔。
+    验收：
+      读 04 写 05：至少三种黑盒技术（EP/BVA/DT 等）在 JSON 中有明确区分与 strategy 记录；
+      读 05 写 06：生成用例列表，每条含 case_id 与可追溯占位字段；
+      用 mock 的 04.json 可独立跑通。
+
+  【P4】可追溯、人工审查入口、导出与启动器 — FR 6.0 + Mainly 后段 + 集成
+    负责脚本：
+      scripts/traceability_and_analysis.py
+      scripts/interactive_review.py
+      scripts/export_artifacts.py
+      launcher.py
+    另负责：tests_target/ 下目标应用自动化脚本；《详细文档》中「工具实现、结果分析」；
+            README 串联说明、requirements.txt、提交用压缩包清单。
+    验收：
+      07 中含「映射 + 简要结果分析」字段；08 经交互脚本可修改并保存（改一条用例可见 diff）；
+      09 导出 JSON + 任选 CSV/XLSX 之一，字段与 SCHEMA 一致；
+      python launcher.py 全流程跑通；支持 --start-from 某步；
+      目标应用至少一条自动化用例能消费 09 中数据或导出的副本。
+
+可选加分（任选一人认领，单独 .py，接入 launcher 可选分支）：
+      scripts/whitebox_model.py（FR4.0） / scripts/oracle_fill.py（FR5.0） /
+      scripts/optimize_suite.py（FR7.0）
+  不接上游时仍从 mock 读入；接入时插入 S6 后或 S8 前，并在 SCHEMA 增加一节说明。
+
+
+六、做事顺序（时间轴上「接力」而非「天天开会」）
+--------------------------------------------------------------------------------
+  Week1
+    D1  全员 1 次短会（≤60 分钟）：选定目标应用 + 主要模块；确认 Python 版本与仓库目录。
+    D2  P1 发布 SCHEMA v1（S0～S2）+ mock 00～02。
+    D3  P2 发布 SCHEMA 补充（S3～S4）+ mock 03～04；P3、P4 只读 SCHEMA，不写对方代码。
+
+  Week2
+    P1 完成 ingest/structure；P2 完成 risk/coverage；互不等待时用对方 mock。
+    P4 起草 launcher 仅串联 S1～S4 的占位调用（失败即停）。
+
+  Week3
+    P3 发布 SCHEMA（S5～S6）+ mock；完成两脚本。
+    P4 扩展 launcher 到 S6；P2 开始风险报告 PDF 填充真实项目数据。
+
+  Week4
+    P4 完成 traceability、interactive_review、export；launcher 拉满 S1～S9。
+    全组联调 1～2 次（每次 ≤90 分钟）：真数据跑一遍 + 修 SCHEMA 兼容问题。
+
+  Week5
+    测试计划 PDF、详细文档 PDF、性能说明（2 秒目标）、视频、PPT；按《要求.txt》分包提交。
+
+冻结规则：SCHEMA 字段「只增不删」；若必须破坏性修改，由 P1 发变更日志并更新所有 mock。
+
+
+七、各步验收清单（组长按表打勾即可）
+--------------------------------------------------------------------------------
+  [ ] 每脚本：python 脚本.py -h 有说明；缺输入文件时打印用法并退出码非 0
+  [ ] 每脚本：对对应 mock 独立运行成功，产出 JSON 可被 json.tool 解析
+  [ ] launcher：全流程成功一次；--start-from 从中部成功一次
+  [ ] interactive_review：能修改 08_reviewed.json 中至少一类实体并保存
+  [ ] export：生成物含 cases + suites + risk 字段，与作业 FR6.0 意图一致
+  [ ] 文档：三份 PDF 针对目标应用；封面信息齐全；提交格式符合 Submission 条款
+
+
+八、沟通降到最低时的「冲突处理」
+--------------------------------------------------------------------------------
+  • 字段争议：以 contracts/SCHEMA.md 为准，发起人在 Issues/群置顶贴「变更 diff」。
+  • 上游延迟：永远允许用 data/mock 上一级输出继续开发。
+  • 集成爆炸：launcher 逐步扩大范围；先用最小 mock 全链路，再换真实需求文件。
+
+================================================================================
+（本方案与「高协作一体化开发」二选一即可；若课程要求展示「设计者参与」，S8 的
+ interactive_review.py 必须在演示中现场改一条数据并再导出。）
+================================================================================
