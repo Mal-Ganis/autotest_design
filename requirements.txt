@@ -1,0 +1,2 @@
+# P1：ingest / structure 仅使用 Python 3.10+ 标准库，无需额外依赖。
+# 下游若使用 spaCy / openai 等，请在此追加并锁定版本。

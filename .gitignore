@@ -1,0 +1,9 @@
+# 流水线运行时产物（保留 data/mock/）
+data/work/
+
+__pycache__/
+*.py[cod]
+.Python
+.env
+.venv/
+venv/

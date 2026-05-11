@@ -1,0 +1,87 @@
+{
+  "schema_version": "1.0",
+  "pipeline_stage": "02_structured",
+  "structured_at": "2026-05-11T07:34:28Z",
+  "requirements": [
+    {
+      "req_id": "FR-LOGIN-001",
+      "raw_text": "用户名长度必须在3到20个字符之间，仅允许字母与数字。",
+      "source": "text",
+      "input_fields": [
+        {
+          "name": "用户名",
+          "kind": "string",
+          "notes": ""
+        }
+      ],
+      "data_ranges": [
+        {
+          "field": "用户名",
+          "min": 3,
+          "max": 20,
+          "unit": "chars",
+          "closed": true,
+          "raw_span": "用户名长度必须在3到20个字符"
+        }
+      ],
+      "conditions": [],
+      "expected_actions": []
+    },
+    {
+      "req_id": "FR-LOGIN-002",
+      "raw_text": "如果密码连续错误超过5次，则锁定该账户30分钟。",
+      "source": "text",
+      "input_fields": [
+        {
+          "name": "密码",
+          "kind": "string",
+          "notes": ""
+        },
+        {
+          "name": "账户",
+          "kind": "string",
+          "notes": ""
+        }
+      ],
+      "data_ranges": [],
+      "conditions": [
+        {
+          "expr": "密码连续错误超过5次",
+          "trace": "regex:if-then"
+        }
+      ],
+      "expected_actions": [
+        {
+          "action": "则锁定该账户30分钟",
+          "trace": "regex:if-then"
+        },
+        {
+          "action": "限制登录或锁定账户",
+          "trace": "keyword:锁定"
+        }
+      ]
+    },
+    {
+      "req_id": "FR-LOGIN-003",
+      "raw_text": "用户成功登录后应跳转到个人资料页，会话超时时间为15分钟无操作。",
+      "source": "csv",
+      "input_fields": [
+        {
+          "name": "会话",
+          "kind": "string",
+          "notes": ""
+        }
+      ],
+      "data_ranges": [],
+      "conditions": [],
+      "expected_actions": [],
+      "extra": {
+        "type": "functional",
+        "priority": "High"
+      }
+    }
+  ],
+  "source_files": [
+    "data\\mock\\00_input_raw.json"
+  ]
+}

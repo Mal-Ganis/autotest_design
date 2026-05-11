@@ -1,0 +1,222 @@
+# AutoTestDesign 工具 — 使用说明（新手向）
+
+本文件面向**刚接触命令行、Python 或本项目的同学**，尽量把每一步写清楚。若你已有经验，可直接看 **「4. 第一次跑通（复制粘贴版）」** 和 **「5. 目录与文件是干什么的」**。
+
+---
+
+## 1. 先搞清楚：这个仓库里有两样不同的东西
+
+容易混淆，请先记住下面这句话：
+
+| 名字 | 是什么 | 和作业的关系 |
+|------|--------|----------------|
+| **AutoTestDesign 工具** | 用 Python 写的「测试设计流水线」：读需求 → 写出一串 JSON 文件，供后面同学继续做风险、用例、导出等 | 这是你们**要开发/拼接**的「工具」 |
+| **目标应用（被测系统）** | 本仓库里的 `target-login-app`：一个**示例网页登录系统** | 这是**用来被测的软件**，不是工具本身；风险报告、测试计划写的是**它**，不是写 AutoTestDesign 的代码 |
+
+**本 README 主要讲「AutoTestDesign 工具」里已经做好的 P1 部分**（需求摄入 + 需求结构化）。  
+**想启动那个登录网站做演示**时，请看子目录里的说明：[`target-login-app/README.md`](target-login-app/README.md)。
+
+---
+
+## 2. 开始之前：你需要本机已安装 Python
+
+**Python** 是一种编程语言；我们写的 `scripts/ingest.py` 等需要用它执行。
+
+### 2.1 怎么检查有没有 Python？
+
+1. 打开**终端**（见下一小节）。
+2. 输入下面命令后按回车：
+
+```text
+python --version
+```
+
+- 若显示 `Python 3.10` 或更高（如 3.11、3.12），**可以**继续。
+- 若提示「不是内部或外部命令」或版本低于 3.10，请先从 [python.org](https://www.python.org/downloads/) 安装，**安装时勾选 “Add Python to PATH”**（把 Python 加入系统路径，否则命令行找不到）。
+
+也可以试：
+
+```text
+py --version
+```
+
+在部分 Windows 电脑上，用 `py` 比 `python` 更稳；下面凡写 `python` 的地方，若失败可改成 `py`。
+
+### 2.2 怎么打开终端？（Windows）
+
+任选一种即可：
+
+- **资源管理器**进入本项目的文件夹，在地址栏输入 `cmd` 或 `powershell` 后回车，会打开已定位到该目录的窗口。
+- 或按 `Win + R`，输入 `cmd` 或 `powershell` 回车，再用 `cd` 进入项目目录（见下）。
+
+**`cd` 是什么？** 就是「进入某个文件夹」。例如你的项目在 `d:\homework\软测\autotest_design`：
+
+```powershell
+cd /d d:\homework\软测\autotest_design
+```
+
+之后提示符前面会显示你当前所在目录。下面的命令**都要在「项目根目录」下执行**（即能看到 `scripts`、`data`、`contracts` 文件夹的那一层）。
+
+---
+
+## 3. 这个工具在做什么？（用生活里的比喻）
+
+可以把 AutoTestDesign 想成一条**流水线**：
+
+1. 你准备好「原始需求」描述（可以放在 JSON、CSV 或纯文本里）。
+2. **第一步（S1）** 程序 `ingest.py` 负责「把各种来源的东西读进来、整理成统一格式」，写出一个叫 **`01_ingested.json`** 的文件。
+3. **第二步（S2）** 程序 `structure.py` 在每条需求上**做简单解析**（例如从中文里抓「长度 3 到 20」「如果…则…」这类信息），写出 **`02_structured.json`**。
+
+这些文件都是 **JSON 格式**（一种用花括号、方括号组织的文本，程序爱用，人类也能打开看）。  
+**你们组约好了每一步读什么、写什么**，写在 `contracts/SCHEMA.md` 里，这叫**契约**——后面 P2、P3、P4 会接着往更后面的文件里写，但**不能乱删**前面已经定好的字段名，否则大家程序对不上。
+
+---
+
+## 4. 第一次跑通（复制粘贴版）
+
+**前提**：已经用上一节的方式进入项目根目录 `autotest_design`，且 `python --version` 正常。
+
+### 4.1（可选）安装依赖
+
+根目录的 `requirements.txt` 里，**P1 脚本不依赖第三方库**，所以即使不 `pip install` 也能跑。若以后组里加了库，再执行：
+
+```powershell
+pip install -r requirements.txt
+```
+
+若提示权限或环境混乱，可让组长统一用 `venv` 虚拟环境（略；需要时可查学校实验文档）。
+
+### 4.2 跑 S1：从 Mock 原始需求生成 `01_ingested.json`
+
+我们已经在 `data/mock/00_input_raw.json` 里放好了**示例输入**，你可以直接跑：
+
+```powershell
+python scripts/ingest.py --in data/mock/00_input_raw.json --out data/work/01_ingested.json
+```
+
+**各参数意思：**
+
+- `--in`：输入文件路径。这里用仓库里自带的 S0 样例。
+- `--out`：输出写到哪里。`data/work/` 是本地运行结果目录，**第一次若不存在，程序会自动创建**（若你本机禁止写盘会报错）。
+
+成功时，终端会有一行类似「已写入 … 条需求」；若失败，会显示中文错误，且**退出码为 1**（表示没成功）。
+
+### 4.3 跑 S2：从 `01` 生成 `02_structured.json`
+
+```powershell
+python scripts/structure.py --in data/work/01_ingested.json --out data/work/02_structured.json
+```
+
+成功后，用记事本或 VS Code 打开 `data/work/02_structured.json`，你能看到每条需求下面多了 `input_fields`、`data_ranges` 等字段。
+
+### 4.4 检查 JSON 是否「格式正确」
+
+（可选）用 Python 自带的工具美化打印，若报错说明文件坏了：
+
+```powershell
+python -m json.tool data/work/02_structured.json
+```
+
+能刷出一大段缩进好的内容，一般就没问题。
+
+---
+
+## 5. 目录与文件是干什么的
+
+```
+autotest_design/                 ← 项目根（你运行命令时要站在这里）
+├── README.md                    ← 本说明（你正在读）
+├── requirements.txt             ← Python 依赖列表（P1 当前可为空）
+├── contracts/
+│   └── SCHEMA.md                ← **全员必读**：每一步 JSON 里该有哪些字段
+├── scripts/
+│   ├── ingest.py                ← S1：多源需求 → 01_ingested.json
+│   └── structure.py             ← S2：01 → 02_structured.json
+├── data/
+│   ├── mock/                    ← **样例数据**（可提交到 Git，给全组对齐用）
+│   │   ├── 00_input_raw.json
+│   │   ├── 01_ingested.json
+│   │   ├── 02_structured.json
+│   │   └── sample_requirements.csv
+│   └── work/                    ← 你本机跑出来的结果（通常不提交，见 .gitignore）
+└── target-login-app/            ← **目标应用**（被测的登录网站，不是工具核心）
+    └── README.md
+```
+
+- **`data/mock/`**：像「标准答卷例题」，格式固定，给别人不接上游也能开发。
+- **`data/work/`**：像「你今晚做作业的草稿纸」，路径可能被 `.gitignore` 忽略，换电脑可能没有，需要自己再跑一遍命令生成。
+
+---
+
+## 6. 脚本详解（给要写代码或联调的同学）
+
+### 6.1 `ingest.py`（对应课程 FR 1.0：多源导入）
+
+**输入可以是：**
+
+| 情况 | 怎么做 |
+|------|--------|
+| 本仓库的 S0 JSON | `--in` 指向 `00_input_raw.json` 即可；`--format` 可省略，扩展名 `.json` 会自动当 JSON。 |
+| CSV 表格 | 文件需 **UTF-8** 编码。表头里要有 **ID 一列**、**描述一列**（列名支持如 `req_id`、`ID`、`description`、`Text` 等常见写法，程序里写了模糊匹配）。示例：`data/mock/sample_requirements.csv`。若识别不对，可加 `--format csv` 强制。 |
+| 纯文本 `.txt` | 默认按「空行」分成多条需求；若没有空行，则**一行一条**。每条会自动编号 `REQ-0001` 这种。 |
+| 标准输入 | `--in -` 表示从键盘管道读**一整段**当一条需求（适合演示）。 |
+
+**输出：** 始终是统一的 **`01_ingested.json`** 结构，字段含义见 `contracts/SCHEMA.md` 的 **S1**。
+
+**常见错误：**
+
+- 忘记写 `--in` 或 `--out` → 会打印帮助并退出码 1。
+- CSV 不是 UTF-8（例如 Excel 直接另存为 ANSI）→ 中文乱码或解析失败；请用 Excel「另存为 CSV UTF-8」或 VS Code 换编码为 UTF-8。
+
+### 6.2 `structure.py`（对应课程 FR 1.1：需求结构化）
+
+**输入：** 必须是 **`01_ingested.json`**（或格式与它一致的文件）。
+
+**输出：** **`02_structured.json`**，在每条需求上增加：
+
+- `input_fields`：识别到的输入名（如用户名、密码）
+- `data_ranges`：数值/长度范围（程序用正则抓常见中文句式）
+- `conditions` / `expected_actions`：简单「如果…则…」或关键词（规则很浅，**不可能覆盖所有自然语言**；作业上允许「规则 + 人工后续修改」）
+
+**注意：** 这里没有装 spaCy 等大模型库，**目的是轻量、可离线、组里人人能跑**。后续若要接 AI，可在保留 JSON 契约的前提下换实现。
+
+---
+
+## 7. 给组里其他同学看的「接力说明」（极简）
+
+- **P2**：读 **`02_structured.json`**，往下写风险与覆盖项（见分工文档）；请在 `SCHEMA.md` **追加**字段，不要删 P1 字段。
+- **P3 / P4**：同样只认 **`contracts/SCHEMA.md`**；launcher 串联时，在 P1 两步之后接上即可。
+
+更正式的分工与时间轴见仓库内 **`Document/详细分工方案.txt`**。
+
+---
+
+## 8. 常见问题（FAQ）
+
+**问：为什么我双击 `ingest.py` 一闪而过？**  
+答：脚本需要在终端里带参数运行；双击往往没有参数，程序就只能退出。请按第 4 节在命令行里执行。
+
+**问：`python` 和 `py` 用哪个？**  
+答：都可以，只要有一个能对应到你安装的 Python 3.10+。
+
+**问：提示找不到 `data\work`？**  
+答：一般会自动创建；若在无写权限目录运行会失败，请把项目放在你有权限的磁盘目录再试。
+
+**问：`02` 里解析结果太笨，正常吗？**  
+答：正常。课程强调的是**可追溯、可修改的流程**；后面还有交互式审查、人工改 JSON。P1 先把「文件格式」和「能跑通」立住。
+
+**问：我只想跑那个登录网站给客户演示？**  
+答：请看 [`target-login-app/README.md`](target-login-app/README.md)，与本工具流水线是两条线，别混在一份作业描述里写错对象。
+
+---
+
+## 9. 还想深入了解？
+
+- **字段级约定**：打开 [`contracts/SCHEMA.md`](contracts/SCHEMA.md)。
+- **作业截止与评分**：见课程下发的 PDF / `Document` 里整理的任务说明。
+- **命令记不住**：随时执行  
+  `python scripts/ingest.py -h`  
+  `python scripts/structure.py -h`  
+  会打印官方参数说明（与本文一致）。
+
+如有新人加入团队，把本文 **第 1～4 节** 发给他即可最快上手。

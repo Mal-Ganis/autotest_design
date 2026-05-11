@@ -1,0 +1,29 @@
+{
+  "schema_version": "1.0",
+  "pipeline_stage": "01_ingested",
+  "ingested_at": "2026-05-11T07:33:37Z",
+  "requirements": [
+    {
+      "req_id": "FR-LOGIN-001",
+      "raw_text": "用户名长度必须在3到20个字符之间，仅允许字母与数字。",
+      "source": "text"
+    },
+    {
+      "req_id": "FR-LOGIN-002",
+      "raw_text": "如果密码连续错误超过5次，则锁定该账户30分钟。",
+      "source": "text"
+    },
+    {
+      "req_id": "FR-LOGIN-003",
+      "raw_text": "用户成功登录后应跳转到个人资料页，会话超时时间为15分钟无操作。",
+      "source": "csv",
+      "extra": {
+        "type": "functional",
+        "priority": "High"
+      }
+    }
+  ],
+  "source_files": [
+    "data\\mock\\00_input_raw.json"
+  ]
+}
