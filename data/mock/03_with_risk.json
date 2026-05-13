@@ -1,0 +1,106 @@
+{
+  "schema_version": "1.0",
+  "pipeline_stage": "03_with_risk",
+  "risk_assessed_at": "2026-05-11T07:58:44Z",
+  "requirements": [
+    {
+      "req_id": "FR-LOGIN-001",
+      "raw_text": "用户名长度必须在3到20个字符之间，仅允许字母与数字。",
+      "source": "text",
+      "input_fields": [
+        {
+          "name": "用户名",
+          "kind": "string",
+          "notes": ""
+        }
+      ],
+      "data_ranges": [
+        {
+          "field": "用户名",
+          "min": 3,
+          "max": 20,
+          "unit": "chars",
+          "closed": true,
+          "raw_span": "用户名长度必须在3到20个字符"
+        }
+      ],
+      "conditions": [],
+      "expected_actions": [],
+      "risk_score": 23.0,
+      "test_priority": "Low",
+      "risk_rationale": [
+        "含 1 处数据范围/边界约束",
+        "描述较短且无分支，风险略下调"
+      ]
+    },
+    {
+      "req_id": "FR-LOGIN-002",
+      "raw_text": "如果密码连续错误超过5次，则锁定该账户30分钟。",
+      "source": "text",
+      "input_fields": [
+        {
+          "name": "密码",
+          "kind": "string",
+          "notes": ""
+        },
+        {
+          "name": "账户",
+          "kind": "string",
+          "notes": ""
+        }
+      ],
+      "data_ranges": [],
+      "conditions": [
+        {
+          "expr": "密码连续错误超过5次",
+          "trace": "regex:if-then"
+        }
+      ],
+      "expected_actions": [
+        {
+          "action": "则锁定该账户30分钟",
+          "trace": "regex:if-then"
+        },
+        {
+          "action": "限制登录或锁定账户",
+          "trace": "keyword:锁定"
+        }
+      ],
+      "risk_score": 69.0,
+      "test_priority": "Medium",
+      "risk_rationale": [
+        "文本含安全/账户/会话相关语义",
+        "识别到 1 条条件分支",
+        "识别到 2 条预期动作"
+      ]
+    },
+    {
+      "req_id": "FR-LOGIN-003",
+      "raw_text": "用户成功登录后应跳转到个人资料页，会话超时时间为15分钟无操作。",
+      "source": "csv",
+      "input_fields": [
+        {
+          "name": "会话",
+          "kind": "string",
+          "notes": ""
+        }
+      ],
+      "data_ranges": [],
+      "conditions": [],
+      "expected_actions": [],
+      "extra": {
+        "type": "functional",
+        "priority": "High"
+      },
+      "risk_score": 72.0,
+      "test_priority": "High",
+      "risk_rationale": [
+        "文本含安全/账户/会话相关语义",
+        "来源标注为高优先级需求"
+      ]
+    }
+  ],
+  "source_files": [
+    "data\\mock\\00_input_raw.json"
+  ]
+}
