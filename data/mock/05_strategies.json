@@ -1,0 +1,265 @@
+{
+  "schema_version": "1.0",
+  "pipeline_stage": "05_strategies",
+  "strategies_generated_at": "2026-05-13T09:15:31Z",
+  "technique_summary": {
+    "EP": 4,
+    "BVA": 2,
+    "DT": 2
+  },
+  "requirements": [
+    {
+      "req_id": "FR-LOGIN-001",
+      "raw_text": "用户名长度必须在3到20个字符之间，仅允许字母与数字。",
+      "source": "text",
+      "input_fields": [
+        {
+          "name": "用户名",
+          "kind": "string",
+          "notes": ""
+        }
+      ],
+      "data_ranges": [
+        {
+          "field": "用户名",
+          "min": 3,
+          "max": 20,
+          "unit": "chars",
+          "closed": true,
+          "raw_span": "用户名长度必须在3到20个字符"
+        }
+      ],
+      "conditions": [],
+      "expected_actions": [],
+      "risk_score": 23.0,
+      "test_priority": "Low",
+      "risk_rationale": [
+        "含 1 处数据范围/边界约束",
+        "描述较短且无分支，风险略下调"
+      ]
+    },
+    {
+      "req_id": "FR-LOGIN-002",
+      "raw_text": "如果密码连续错误超过5次，则锁定该账户30分钟。",
+      "source": "text",
+      "input_fields": [
+        {
+          "name": "密码",
+          "kind": "string",
+          "notes": ""
+        },
+        {
+          "name": "账户",
+          "kind": "string",
+          "notes": ""
+        }
+      ],
+      "data_ranges": [],
+      "conditions": [
+        {
+          "expr": "密码连续错误超过5次",
+          "trace": "regex:if-then"
+        }
+      ],
+      "expected_actions": [
+        {
+          "action": "则锁定该账户30分钟",
+          "trace": "regex:if-then"
+        },
+        {
+          "action": "限制登录或锁定账户",
+          "trace": "keyword:锁定"
+        }
+      ],
+      "risk_score": 69.0,
+      "test_priority": "Medium",
+      "risk_rationale": [
+        "文本含安全/账户/会话相关语义",
+        "识别到 1 条条件分支",
+        "识别到 2 条预期动作"
+      ]
+    },
+    {
+      "req_id": "FR-LOGIN-003",
+      "raw_text": "用户成功登录后应跳转到个人资料页，会话超时时间为15分钟无操作。",
+      "source": "csv",
+      "input_fields": [
+        {
+          "name": "会话",
+          "kind": "string",
+          "notes": ""
+        }
+      ],
+      "data_ranges": [],
+      "conditions": [],
+      "expected_actions": [],
+      "extra": {
+        "type": "functional",
+        "priority": "High"
+      },
+      "risk_score": 72.0,
+      "test_priority": "High",
+      "risk_rationale": [
+        "文本含安全/账户/会话相关语义",
+        "来源标注为高优先级需求"
+      ]
+    }
+  ],
+  "coverage_items": [
+    {
+      "coverage_id": "COV-001",
+      "description": "验证「用户名」取值区间与边界（等价类划分 + 边界值分析），依据需求 FR-LOGIN-001",
+      "linked_req_ids": [
+        "FR-LOGIN-001"
+      ],
+      "focus": "data_range",
+      "notes": "范围线索：用户名长度必须在3到20个字符"
+    },
+    {
+      "coverage_id": "COV-002",
+      "description": "覆盖条件分支：当 密码连续错误超过5次 时系统行为（决策表/场景），需求 FR-LOGIN-002",
+      "linked_req_ids": [
+        "FR-LOGIN-002"
+      ],
+      "focus": "condition_branch",
+      "notes": "条件索引 1"
+    },
+    {
+      "coverage_id": "COV-003",
+      "description": "验证预期动作是否发生：则锁定该账户30分钟（需求 FR-LOGIN-002）",
+      "linked_req_ids": [
+        "FR-LOGIN-002"
+      ],
+      "focus": "expected_action",
+      "notes": "动作索引 1"
+    },
+    {
+      "coverage_id": "COV-004",
+      "description": "验证预期动作是否发生：限制登录或锁定账户（需求 FR-LOGIN-002）",
+      "linked_req_ids": [
+        "FR-LOGIN-002"
+      ],
+      "focus": "expected_action",
+      "notes": "动作索引 2"
+    },
+    {
+      "coverage_id": "COV-005",
+      "description": "对需求 FR-LOGIN-003 进行整体功能验证（摘要：用户成功登录后应跳转到个人资料页，会话超时时间为15分钟无操作。…）",
+      "linked_req_ids": [
+        "FR-LOGIN-003"
+      ],
+      "focus": "general_functional",
+      "notes": "结构化细节较少时的兜底覆盖项"
+    },
+    {
+      "coverage_id": "COV-006",
+      "description": "高风险需求 FR-LOGIN-003：补充异常输入与安全相关负面场景（优先级 High，risk_score=72.0）",
+      "linked_req_ids": [
+        "FR-LOGIN-003"
+      ],
+      "focus": "risk_negative",
+      "notes": "由 test_priority=High 触发"
+    }
+  ],
+  "strategies": [
+    {
+      "strategy_id": "STR-001",
+      "technique": "EP",
+      "linked_coverage_ids": [
+        "COV-001"
+      ],
+      "linked_req_ids": [
+        "FR-LOGIN-001"
+      ],
+      "risk_priority": "Low",
+      "prompt_notes": "对「用户名」划分等价类：有效区间 [3, 20] chars，无效区间 <3 和 >20；另需考虑空输入与特殊字符；需求原文参考：用户名长度必须在3到20个字符之间，仅允许字母与数字。"
+    },
+    {
+      "strategy_id": "STR-002",
+      "technique": "BVA",
+      "linked_coverage_ids": [
+        "COV-001"
+      ],
+      "linked_req_ids": [
+        "FR-LOGIN-001"
+      ],
+      "risk_priority": "Low",
+      "prompt_notes": "「用户名」边界值：2, 3, 4, 19, 20, 21 (chars)"
+    },
+    {
+      "strategy_id": "STR-003",
+      "technique": "DT",
+      "linked_coverage_ids": [
+        "COV-002"
+      ],
+      "linked_req_ids": [
+        "FR-LOGIN-002"
+      ],
+      "risk_priority": "Medium",
+      "prompt_notes": "条件桩：密码连续错误超过5次；动作桩：则锁定该账户30分钟、限制登录或锁定账户；列举所有条件组合（True/False），标注各组合下的预期动作"
+    },
+    {
+      "strategy_id": "STR-004",
+      "technique": "EP",
+      "linked_coverage_ids": [
+        "COV-003"
+      ],
+      "linked_req_ids": [
+        "FR-LOGIN-002"
+      ],
+      "risk_priority": "Medium",
+      "prompt_notes": "验证动作「则锁定该账户30分钟」在正常/异常输入下的触发情况；验证动作「限制登录或锁定账户」在正常/异常输入下的触发情况；需求原文参考：如果密码连续错误超过5次，则锁定该账户30分钟。"
+    },
+    {
+      "strategy_id": "STR-005",
+      "technique": "EP",
+      "linked_coverage_ids": [
+        "COV-004"
+      ],
+      "linked_req_ids": [
+        "FR-LOGIN-002"
+      ],
+      "risk_priority": "Medium",
+      "prompt_notes": "验证动作「则锁定该账户30分钟」在正常/异常输入下的触发情况；验证动作「限制登录或锁定账户」在正常/异常输入下的触发情况；需求原文参考：如果密码连续错误超过5次，则锁定该账户30分钟。"
+    },
+    {
+      "strategy_id": "STR-006",
+      "technique": "EP",
+      "linked_coverage_ids": [
+        "COV-005"
+      ],
+      "linked_req_ids": [
+        "FR-LOGIN-003"
+      ],
+      "risk_priority": "High",
+      "prompt_notes": "对覆盖项进行等价类划分：有效与无效输入各取代表值；需求原文参考：用户成功登录后应跳转到个人资料页，会话超时时间为15分钟无操作。"
+    },
+    {
+      "strategy_id": "STR-007",
+      "technique": "BVA",
+      "linked_coverage_ids": [
+        "COV-006"
+      ],
+      "linked_req_ids": [
+        "FR-LOGIN-003"
+      ],
+      "risk_priority": "High",
+      "prompt_notes": "对关键数值型输入进行边界值分析（含上下边界 ±1）；重点关注异常/极端边界以覆盖高风险负面场景"
+    },
+    {
+      "strategy_id": "STR-008",
+      "technique": "DT",
+      "linked_coverage_ids": [
+        "COV-006"
+      ],
+      "linked_req_ids": [
+        "FR-LOGIN-003"
+      ],
+      "risk_priority": "High",
+      "prompt_notes": "基于需求中的条件与动作构建决策表，列举组合并标注预期结果；补充非法组合与异常条件的决策行"
+    }
+  ],
+  "source_files": [
+    "data\\mock\\00_input_raw.json"
+  ]
+}
