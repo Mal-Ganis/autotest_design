@@ -2,6 +2,7 @@
 """
 S2 — 需求结构化（FR 1.1）
 读入 01_ingested.json，基于规则/正则抽取 input_fields、data_ranges、conditions、expected_actions。
+可选 `--use-ai`：在配置 `OPENAI_API_KEY` 或 `DEEPSEEK_API_KEY` 时用兼容 API 补充/合并结构化结果（见 `llm_optional.py`）。
 """
 
 from __future__ import annotations
@@ -124,9 +125,20 @@ def _dedupe_dicts(items: list[dict[str, Any]], key) -> list[dict[str, Any]]:
     return out
 
 
-def structure_requirement(req: dict[str, Any]) -> dict[str, Any]:
+def structure_requirement(req: dict[str, Any], *, use_ai: bool = False) -> dict[str, Any]:
     raw = str(req.get("raw_text") or "")
     parsed = extract_fields(raw)
+    if use_ai:
+        try:
+            from llm_optional import ai_extract_structure, merge_structure, openai_configured
+
+            if openai_configured():
+                ai = ai_extract_structure(raw)
+                parsed = merge_structure(parsed, ai)
+            else:
+                print("提示：已指定 --use-ai 但未配置 OPENAI_API_KEY 或 DEEPSEEK_API_KEY，仍仅使用规则。", file=sys.stderr)
+        except ImportError as ex:
+            print(f"提示：无法加载 LLM 模块（{ex}），请 pip install openai python-dotenv", file=sys.stderr)
     out = {
         "req_id": req.get("req_id"),
         "raw_text": req.get("raw_text"),
@@ -156,6 +168,11 @@ def main() -> int:
         required=True,
         help="输出 02_structured.json",
     )
+    parser.add_argument(
+        "--use-ai",
+        action="store_true",
+        help="启用大模型 API 补充结构化字段（需 .env：OPENAI_API_KEY 或 DEEPSEEK_API_KEY）",
+    )
     args = parser.parse_args()
 
     in_path = Path(args.in_path)
@@ -175,7 +192,7 @@ def main() -> int:
         eprint("错误：输入缺少 requirements 数组。")
         return 1
 
-    structured = [structure_requirement(r) for r in reqs if isinstance(r, dict)]
+    structured = [structure_requirement(r, use_ai=args.use_ai) for r in reqs if isinstance(r, dict)]
     now = datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace(
         "+00:00", "Z"
     )
@@ -199,7 +216,7 @@ def main() -> int:
         eprint(f"错误：无法写入：{ex}")
         return 1
 
-    print(f"已写入 {out_path}（{len(structured)} 条需求）")
+    print(f"已写入 {out_path}（{len(structured)} 条需求）{'（已请求 --use-ai）' if args.use_ai else ''}")
     return 0
 
 

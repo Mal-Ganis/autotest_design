@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "pipeline_stage": "00_raw",
-  "document_id": "mock-target-login",
+  "document_id": "mock-dev-only-not-target-app",
   "requirements": [
     {
       "req_id": "FR-LOGIN-001",

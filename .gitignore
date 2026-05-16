@@ -1,9 +1,44 @@
-# 流水线运行时产物（保留 data/mock/）
+# --- 流水线本地运行产物（提交 data/mock/ 样例即可）---
 data/work/
 
+# --- Python ---
 __pycache__/
 *.py[cod]
+*$py.class
+*.so
 .Python
+*.egg-info/
+.eggs/
+dist/
+build/
+
+# --- 虚拟环境与密钥（勿提交）---
 .env
+.env.local
 .venv/
 venv/
+ENV/
+
+# --- 测试与类型检查缓存 ---
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.mypy_cache/
+.ruff_cache/
+
+# --- 编辑器与系统 ---
+.vscode/
+.idea/
+*.swp
+*~
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# --- 日志与临时文件 ---
+*.log
+*.tmp
+
+# --- 目标应用本地库（见 target-login-app/.gitignore）---
+target-login-app/app.db

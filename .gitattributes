@@ -1,0 +1,22 @@
+# 仓库内统一 LF，避免 Windows/macOS/Linux 混用 CRLF/LF 产生 diff 噪音
+* text=auto eol=lf
+
+*.py text eol=lf
+*.md text eol=lf
+*.json text eol=lf
+*.js text eol=lf
+*.html text eol=lf
+*.css text eol=lf
+*.txt text eol=lf
+*.csv text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.sh text eol=lf
+
+# 明确二进制，不做换行转换
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary

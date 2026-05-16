@@ -2,7 +2,8 @@
 """
 S3 — 风险分析与测试优先级（FR 2.0）
 读入 02_structured.json，为每条需求追加 risk_score、test_priority 及简要依据。
-采用可解释的启发式规则（关键词、条件/动作数量、业务敏感度），不依赖外部 API。
+采用可解释的启发式规则（关键词、条件/动作数量、业务敏感度）。可选 `--use-ai`：在配置
+`OPENAI_API_KEY` 时与 OpenAI 兼容 API 融合评估（见 `scripts/llm_optional.py`）。
 """
 
 from __future__ import annotations
@@ -89,16 +90,33 @@ def assess_requirement(req: dict[str, Any]) -> tuple[float, str, list[str]]:
     return score, tp, rationale
 
 
-def prioritize_payload(data: dict[str, Any]) -> dict[str, Any]:
+def prioritize_payload(data: dict[str, Any], *, use_ai: bool = False) -> dict[str, Any]:
     reqs_in = data.get("requirements")
     if not isinstance(reqs_in, list):
         raise ValueError("输入缺少 requirements 数组")
+
+    llm = None
+    if use_ai:
+        try:
+            from llm_optional import ai_assess_risk, blend_risk, openai_configured
+
+            if openai_configured():
+                llm = (ai_assess_risk, blend_risk)
+            else:
+                eprint("提示：已指定 --use-ai 但未配置 OPENAI_API_KEY 或 DEEPSEEK_API_KEY，仍仅使用规则引擎。")
+        except ImportError as ex:
+            eprint(f"提示：无法加载 LLM 模块（{ex}），请 pip install openai python-dotenv")
 
     out_reqs: list[dict[str, Any]] = []
     for r in reqs_in:
         if not isinstance(r, dict):
             continue
         score, tp, rationale = assess_requirement(r)
+        if llm is not None:
+            ai_assess_risk_fn, blend_risk_fn = llm
+            hint = f"规则引擎：risk_score={score}, test_priority={tp}, rationale={rationale}"
+            ai = ai_assess_risk_fn(str(r.get("raw_text") or ""), hint)
+            score, tp, rationale = blend_risk_fn(score, tp, rationale, ai)
         item = {**r}
         item["risk_score"] = score
         item["test_priority"] = tp
@@ -140,6 +158,11 @@ def main() -> int:
         required=True,
         help="输出 03_with_risk.json",
     )
+    parser.add_argument(
+        "--use-ai",
+        action="store_true",
+        help="启用大模型 API 与规则结果融合（需 .env：OPENAI_API_KEY 或 DEEPSEEK_API_KEY）",
+    )
     args = parser.parse_args()
 
     in_path = Path(args.in_path)
@@ -155,7 +178,7 @@ def main() -> int:
         return 1
 
     try:
-        out_obj = prioritize_payload(data)
+        out_obj = prioritize_payload(data, use_ai=args.use_ai)
     except ValueError as ex:
         eprint(f"错误：{ex}")
         return 1
@@ -171,7 +194,8 @@ def main() -> int:
         return 1
 
     n = len(out_obj.get("requirements") or [])
-    print(f"已写入 {out_path}（{n} 条需求已标注风险与优先级）")
+    suffix = "（已请求 --use-ai）" if args.use_ai else ""
+    print(f"已写入 {out_path}（{n} 条需求已标注风险与优先级）{suffix}")
     return 0
 
 

@@ -1,0 +1,9 @@
+req_id,Description,Type,Priority
+FR-TGT-REG-001,用户注册时用户名不能为空，长度须为 3 到 20 个字符，仅允许字母、数字与下划线。,functional,Medium
+FR-TGT-REG-002,用户注册时密码不能为空，长度须为 8 到 30 位，且须同时包含小写字母、大写字母与数字。,functional,Medium
+FR-TGT-REG-003,用户注册时须填写有效邮箱格式；两次输入的密码必须一致；若用户名已被占用则注册失败。,functional,Medium
+FR-TGT-LOGIN-001,用户登录时用户名与密码均不能为空；若用户不存在或密码错误则拒绝登录。,functional,Medium
+FR-TGT-LOGIN-002,如果同一账户密码连续错误超过 5 次，则锁定该账户 30 分钟，锁定期间登录应被拒绝。,functional,High
+FR-TGT-LOGIN-003,用户凭正确用户名与密码登录成功后，应建立会话；已登录用户可访问个人资料接口并看到自己的用户名。,functional,Medium
+FR-TGT-SESSION-001,未登录或会话失效时访问个人资料应返回未授权；用户登出后会话应清除。,functional,Medium
+FR-TGT-RESET-001,用户可通过注册邮箱请求密码重置；使用有效重置令牌且新密码符合强度规则、两次输入一致时可重置密码；无效或过期令牌应拒绝。,functional,Medium

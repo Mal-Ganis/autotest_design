@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AutoTestDesign</title>
+  <link rel="stylesheet" href="/assets/style.css" />
+</head>
+<body>
+  <header>
+    <h1>AutoTestDesign</h1>
+    <p>需求摄入 → 结构化 → 风险 → 覆盖项 → 策略 → 黑盒用例 → 可追溯 → 审查 → 导出（S1～S9）</p>
+  </header>
+  <nav class="tabs" role="tablist">
+    <button type="button" class="active" data-tab="ingest">需求导入</button>
+    <button type="button" data-tab="pipeline">流水线</button>
+    <button type="button" data-tab="artifacts">产物浏览</button>
+    <button type="button" data-tab="review">审查（S8）</button>
+    <button type="button" data-tab="help">说明</button>
+  </nav>
+  <main>
+    <section id="tab-ingest" class="tab-panel active" role="tabpanel">
+      <div class="card">
+        <h2>FR 1.0 — 需求来源（S1 ingest）</h2>
+        <p class="hint">对应 <code>scripts/ingest.py</code>：支持 JSON（S0）、CSV、纯文本粘贴、上传文件。默认使用被测系统 <code>target-login-app/requirements/</code> 下人工整理的需求。</p>
+        <fieldset class="source-group">
+          <legend class="sr-only">来源</legend>
+          <label><input type="radio" name="ingestSource" value="target" checked /> 目标应用需求（JSON）</label>
+          <label><input type="radio" name="ingestSource" value="target_csv" /> 目标应用需求（CSV）</label>
+          <label><input type="radio" name="ingestSource" value="mock" /> 开发 mock 样例（仅联调）</label>
+          <label><input type="radio" name="ingestSource" value="paste" /> 粘贴纯文本</label>
+          <label><input type="radio" name="ingestSource" value="upload" /> 使用已上传文件</label>
+        </fieldset>
+        <div class="row" id="ingestPasteRow" style="display:none;">
+          <label for="ingestPaste">粘贴内容（每行一条，或空行分隔段落）</label>
+          <textarea id="ingestPaste" placeholder="例如：&#10;用户登录时用户名与密码均不能为空…&#10;&#10;注册时密码须 8～30 位…"></textarea>
+        </div>
+        <div class="row inline">
+          <input type="file" id="ingestFile" accept=".json,.csv,.txt" />
+          <button type="button" class="btn" id="btnIngestUploadRun">上传并执行 S1</button>
+        </div>
+        <div class="row inline">
+          <button type="button" class="btn btn-primary" id="btnRunIngest">执行 S1（ingest）</button>
+          <button type="button" class="btn" id="btnRefreshIngestSummary">刷新 01 摘要</button>
+          <button type="button" class="btn" id="btnGoPipelineS2">S1 完成后从 S2 跑流水线</button>
+        </div>
+        <div id="ingestSummaryBox" class="summary-box hint">尚未加载 01_ingested 摘要</div>
+        <label>ingest 日志</label>
+        <pre id="ingest-log"></pre>
+      </div>
+    </section>
+
+    <section id="tab-pipeline" class="tab-panel" role="tabpanel">
+      <div class="card">
+        <h2>运行 launcher</h2>
+        <div class="row">
+          <label for="startFrom">从哪一步开始</label>
+          <select id="startFrom"></select>
+        </div>
+        <div class="row inline">
+          <label><input type="checkbox" id="chkExportCsv" checked /> S9 同时导出 CSV</label>
+          <label><input type="checkbox" id="chkUseUpload" /> S1 改用下方上传文件（默认用 target-login-app 需求）</label>
+          <label><input type="checkbox" id="chkUseMock" /> S1 强制使用 data/mock 样例</label>
+          <label><input type="checkbox" id="chkUseAi" /> S2/S3 启用 LLM（需根目录 .env：OPENAI_* 或 DEEPSEEK_*）</label>
+        </div>
+        <p class="hint">建议先在「需求导入」执行 S1，再从此处选 <strong>structure</strong> 起跑，避免重复摄入。Web 端 S8 自动透传；现场改字请用「审查」页。</p>
+        <div class="row inline">
+          <button type="button" class="btn btn-primary" id="btnRunPipeline">启动流水线</button>
+          <button type="button" class="btn" id="btnExportOnly">仅运行 S9 导出</button>
+        </div>
+        <label>日志</label>
+        <pre id="pipeline-log"></pre>
+      </div>
+    </section>
+
+    <section id="tab-artifacts" class="tab-panel" role="tabpanel">
+      <div class="card">
+        <h2>data/work 下的文件</h2>
+        <div class="row inline">
+          <button type="button" class="btn" id="btnRefreshArtifacts">刷新列表</button>
+          <select id="artifactSelect" style="flex:1;min-width:200px;"></select>
+          <button type="button" class="btn btn-primary" id="btnLoadArtifact">查看 JSON / 文本</button>
+        </div>
+        <div class="row inline" style="margin-top:0.5rem;">
+          <a id="btnDownloadArtifact" class="btn" href="#" style="display:none;text-decoration:none;">下载当前文件</a>
+        </div>
+        <pre id="artifact-json"></pre>
+      </div>
+    </section>
+
+    <section id="tab-review" class="tab-panel" role="tabpanel">
+      <div class="card">
+        <h2>加载</h2>
+        <div class="row inline">
+          <select id="reviewLoadSrc">
+            <option value="07">work/07_traceability.json</option>
+            <option value="08">work/08_reviewed.json</option>
+            <option value="mock07">mock/07（样例）</option>
+            <option value="mock08">mock/08（样例）</option>
+          </select>
+          <button type="button" class="btn btn-primary" id="btnReviewLoad">加载到浏览器</button>
+          <button type="button" class="btn" id="btnReviewSave">保存为 work/08_reviewed.json</button>
+        </div>
+        <p class="hint">修订计数：<strong id="editCount">0</strong>（每次「应用本条」+1）</p>
+      </div>
+      <div class="card">
+        <h2>测试用例</h2>
+        <div class="row">
+          <label for="caseSelect">case_id</label>
+          <select id="caseSelect"></select>
+        </div>
+        <div class="row"><label>title</label><input type="text" id="caseTitle" /></div>
+        <div class="row"><label>technique</label><input type="text" id="caseTech" /></div>
+        <div class="row"><label>steps（每行一步，或一行内用 | 分隔）</label><textarea id="caseSteps"></textarea></div>
+        <div class="row"><label>expected_result</label><textarea id="caseExpected"></textarea></div>
+        <button type="button" class="btn" id="btnApplyCase">应用本条到内存</button>
+        <pre id="caseDiff" style="display:none;margin-top:0.75rem;"></pre>
+      </div>
+      <div class="card">
+        <h2>覆盖项</h2>
+        <div class="row"><label for="covSelect">coverage_id</label><select id="covSelect"></select></div>
+        <div class="row"><label>description</label><textarea id="covDesc"></textarea></div>
+        <div class="row"><label>notes</label><textarea id="covNotes"></textarea></div>
+        <button type="button" class="btn" id="btnApplyCov">应用本条到内存</button>
+      </div>
+      <div class="card">
+        <h2>策略 prompt_notes</h2>
+        <div class="row"><label for="stratSelect">strategy_id</label><select id="stratSelect"></select></div>
+        <div class="row"><label>technique</label><input type="text" id="stratTech" readonly /></div>
+        <div class="row"><label>prompt_notes</label><textarea id="stratPrompt"></textarea></div>
+        <button type="button" class="btn" id="btnApplyStrat">应用本条到内存</button>
+      </div>
+      <div class="card">
+        <h2>审查备注</h2>
+        <input type="text" id="reviewNotes" placeholder="可选，写入 08 JSON" />
+      </div>
+    </section>
+
+    <section id="tab-help" class="tab-panel" role="tabpanel">
+      <div class="card">
+        <h2>推荐流程（Web）</h2>
+        <ol>
+          <li><strong>需求导入</strong>：选来源 → 执行 S1（或上传并执行）→ 看 01 摘要。</li>
+          <li><strong>需求导入</strong>：点「S1 完成后从 S2 跑流水线」，或到「流水线」手动选起点 <code>structure</code>。</li>
+          <li><strong>流水线</strong>：启动流水线（可勾选 CSV / LLM / mock）→ 查看日志。</li>
+          <li><strong>产物浏览</strong>：刷新并查看 <code>09_export_cases.json</code>，可下载。</li>
+          <li>（可选）<strong>审查</strong>：加载 07 → 修改 → 保存 08 →「流水线」仅 S9。</li>
+        </ol>
+        <p class="hint">完整功能与流程 A～F（命令行 / Web / pytest）：见仓库 <code>Document/AutoTestDesign_运行与改动说明.md</code>。命令行一键：<code>python launcher.py --export-csv</code>。契约：<code>contracts/SCHEMA.md</code>。</p>
+      </div>
+    </section>
+  </main>
+  <div id="toast" role="status"></div>
+  <script src="/assets/app.js"></script>
+</body>
+</html>

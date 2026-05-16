@@ -33,3 +33,15 @@ python app.py
 | POST | `/api/reset` | 使用 token 设置新密码 |
 
 生产环境请设置环境变量 `LOGIN_APP_SECRET` 作为 Flask `SECRET_KEY`。
+
+## 被 AutoTestDesign 测试的需求（S0）
+
+本目录下 **`requirements/00_input_raw.json`** 描述的是**本应用真实行为**（与 `services.py`、`app.py` 一致），供工具流水线 S1 默认读取：
+
+```bash
+# 在仓库根目录
+python launcher.py --export-csv
+# 等价于 S1 读入 target-login-app/requirements/00_input_raw.json
+```
+
+`data/mock/00_input_raw.json` 仅用于组员离线开发接力，**交作业测目标应用时不要用它**。

@@ -1,0 +1,3 @@
+# P4 tests_target：pytest + requests（消费 09_export_cases.json 驱动目标应用测试）
+pytest>=7.4.0
+requests>=2.31.0

@@ -1,0 +1,128 @@
+Assignment 2 (Final Project – Updated on 8th May 2026)
+
+Requirements
+ID
+
+Feature Category
+
+Description
+
+FR 1.0
+
+Input/Parsing
+
+The system can ingest software requirements from various sources (e.g., CSV, plain text, or direct user input).
+
+FR 1.1
+
+Requirement Structuring
+
+The system can parse and tokenize raw text, identifying key components such as Input Fields, Data Ranges, Conditions, and Expected Actions.
+
+FR 2.0
+
+Risk Analysis & Prioritization
+
+The system can assign a Risk Score and Test Priority (High, Medium, Low) to each imported requirement.
+
+FR 3.0
+
+Black-Box Test Design
+
+The system can automatically apply and generate test cases for at least three core Black-Box techniques from ISO 29119-4 (e.g., Equivalence Partitioning, Boundary Value Analysis, Decision Tables).
+
+FR 4.0
+
+White-Box Test Modeling
+
+The system can model system behavior (e.g., State Transition Diagram) and generate optimal test sequences for a chosen coverage criterion (e.g., All States).
+
+FR 5.0
+
+Test Oracle Generation
+
+The system can help synthesize the Expected Result for a given requirement and specific test data.
+
+FR 6.0
+
+Output & Export
+
+The system can generate test artifacts (Test Cases, Test Suites, Risk Scores) in a structured, standard format (e.g., JSON or Excel/CSV) suitable for import into Test Management Tools.
+
+FR 7.0
+
+Test Suite Optimization
+
+The system includes an optimization to prioritize or minimize the generated Test Suite based on risk or coverage efficiency.
+
+This assignment requires the development of an AI-driven AutoTestDesign tool capable of performing requirements analysis, risk assessment, and systematic test case generation, among other functions, aligning with industry standards such as ISTQB Foundation Level principles and the detailed test techniques defined in ISO/IEC/IEEE standards.
+
+Important clarification: You will develop the AutoTestDesign tool and then use it to test a self-chosen target application (e.g., a web app, a calculator, a login module, a to-do list) to demonstrate the tool’s effectiveness.
+
+1.1 AutoTestDesign Requirements
+
+The AutoTestDesign application comprises functional requirements (1.1.1) and non-functional requirements (1.1.2).
+
+1.1.1 Functional Requirements (FR)
+
+The system must implement at least FR 1.0, FR 1.1, FR 2.0, FR 3.0, FR 6.0, and the interactive review capability described in the “Mainly” paragraph. Other FRs (4.0, 5.0, 7.0) are optional, but implementing them will earn extra credit.
+
+1.1.2 Non-Functional Requirements (NFR)
+
+The non-functional requirements include but are not limited to:
+
+Performance
+Usability (UX/UI)
+Security
+Maintainability and Technology
+1.2 Project Artifact
+
+You must submit the following artifacts:
+
+AI-driven AutoTestDesign tool, including source code, prompts, setup instructions (README), and a video demonstration – (20%)
+Risk Analysis Report for the self-chosen target application (not the tool itself) – (10%)
+Test Plan covering at least the following aspects – (40%):
+Project Scope: Background and overall objectives of the testing activity on the self-chosen target application
+Test Items: Major functional and non-functional features of the target application; description of the system architecture and main components
+High-level Test Suite Design: Based on the requirements of the target application and the risk analysis, select testing techniques for each test suite
+Schedule or Checklist: Show test levels and objectives
+Organization Chart: Explain team members‘ responsibilities for the testing activity using the tool
+Chosen Testing Framework and Rationale: The framework used to execute tests on the target application (e.g., Selenium, JUnit, PyTest)
+Cost Estimation: Cost estimation for testing the self-chosen target application using the developed AutoTestDesign tool (e.g., effort in person-hours, resource costs, comparison with manual testing)
+Detailed Test Design and Execution Document for one major feature/module of the self-chosen target application – (30%):
+Test Case Design: Design test cases for the selected feature/module using the AutoTestDesign tool, and explain test coverage. Use multiple black-box testing techniques and also white-box techniques.
+Test Tool Implementation: Choose a testing framework for executing the tests on the target application; ideally develop test scripts based on the detailed test cases above.
+Test Result Analysis: Summary based on the test results.
+Mainly: Concept → Coverage Item Identification → Coverage Strategy & Method → Test Cases and Traceability of Their Design → Prompt Design → results analysis (mapping of designed test cases to Coverage Item Identification and Coverage Strategy & Method) → improvement with evidence (newly added valid coverage items and test cases). Tools should reflect the designer’s participation and interactive validation of effectiveness. The tool must allow the designer to interactively review, revise, and change design items during the above processes.
+
+The above process must be applied to the testing of your self-chosen target application. The “designer” refers to the human tester using your AutoTestDesign tool. Your tool must support interactive modification of coverage items, strategies, and test cases.
+
+Assessment Criteria
+Understanding of concepts – 10%
+Coherence of design and implementation – 20%
+Coverage and effectiveness/usefulness – 40%
+In-depth analysis (generalizability demonstration, reasoning, etc.) – 20%
+Presentation – 10%
+Presentation
+Each group has 15 minutes to complete the project presentation, covering all aspects listed above. A Q&A session follows. Reviewers will ask questions based on the submitted documents, presentation content, and the software testing fundamentals that students are expected to have learned.
+
+Submission
+Each group must submit the following materials by email to the TA:
+
+a) Project Artifact: Contains all required content described in Section 1.2 above (the cover page must include the team ID, full names of all members, and student IDs).
+b) Final Presentation PPT: The first slide must include the team ID and full names and student IDs of all members.
+The report and PPT (items 2, 3, and 4 in Section 1.2) must be submitted in PDF format, and the tool materials (item 1 in Section 1.2) must be submitted as a compressed file.
+
+Submission and Presentation Schedule:
+
+Submission Deadline: Week 13, Friday, before 17:00
+Presentation Dates: Week 14–16, Tuesday/Thursday, 10:00–11:35
+Important Clarifications for Students
+To avoid confusion, please note the following:
+
+You are required to develop an AutoTestDesign tool (the “tool”).
+You must select a separate target application (e.g., a simple web app, a calculator, a login system, a to-do list) to be tested using your tool.
+The Risk Analysis Report, Test Plan, and Detailed Test Design and Execution Document all refer to testing the target application, not testing the tool itself.
+The Cost Estimation should estimate the cost of using your tool to test the target application, optionally compared with manual testing.
+Your tool must support interactive design review (allowing the tester to modify coverage items, strategies, etc.) as emphasized in the “Mainly” paragraph.
+Performance requirements (e.g., test case generation time must not exceed 2 seconds) are mandatory targets that you should strive to meet. If you cannot fully achieve them due to technical or resource limitations, provide a detailed analysis and improvement suggestions in your documentation.

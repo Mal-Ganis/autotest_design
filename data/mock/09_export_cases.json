@@ -1,0 +1,423 @@
+{
+  "schema_version": "1.0",
+  "pipeline_stage": "09_export",
+  "exported_at": "2026-05-15T05:35:14Z",
+  "document_id": null,
+  "suites": [
+    {
+      "suite_id": "SUITE-001",
+      "name": "High 优先级回归套件",
+      "priority": "High",
+      "case_ids": [
+        "TC-021",
+        "TC-022",
+        "TC-023",
+        "TC-024",
+        "TC-025"
+      ],
+      "case_count": 5
+    },
+    {
+      "suite_id": "SUITE-002",
+      "name": "Medium 优先级回归套件",
+      "priority": "Medium",
+      "case_ids": [
+        "TC-011",
+        "TC-012",
+        "TC-013",
+        "TC-014",
+        "TC-015",
+        "TC-016",
+        "TC-017",
+        "TC-018",
+        "TC-019",
+        "TC-020"
+      ],
+      "case_count": 10
+    },
+    {
+      "suite_id": "SUITE-003",
+      "name": "Low 优先级回归套件",
+      "priority": "Low",
+      "case_ids": [
+        "TC-001",
+        "TC-002",
+        "TC-003",
+        "TC-004",
+        "TC-005",
+        "TC-006",
+        "TC-007",
+        "TC-008",
+        "TC-009",
+        "TC-010"
+      ],
+      "case_count": 10
+    },
+    {
+      "suite_id": "SUITE-T004",
+      "name": "BVA 技术专项套件",
+      "priority": "Medium",
+      "technique": "BVA",
+      "case_ids": [
+        "TC-005",
+        "TC-006",
+        "TC-007",
+        "TC-008",
+        "TC-009",
+        "TC-010",
+        "TC-023"
+      ],
+      "case_count": 7
+    },
+    {
+      "suite_id": "SUITE-T005",
+      "name": "DT 技术专项套件",
+      "priority": "Medium",
+      "technique": "DT",
+      "case_ids": [
+        "TC-011",
+        "TC-012",
+        "TC-024",
+        "TC-025"
+      ],
+      "case_count": 4
+    },
+    {
+      "suite_id": "SUITE-T006",
+      "name": "EP 技术专项套件",
+      "priority": "Medium",
+      "technique": "EP",
+      "case_ids": [
+        "TC-001",
+        "TC-002",
+        "TC-003",
+        "TC-004",
+        "TC-013",
+        "TC-014",
+        "TC-015",
+        "TC-016",
+        "TC-017",
+        "TC-018",
+        "TC-019",
+        "TC-020",
+        "TC-021",
+        "TC-022"
+      ],
+      "case_count": 14
+    }
+  ],
+  "cases": [
+    {
+      "case_id": "TC-001",
+      "title": "EP-有效类：用户名 在有效区间内（11 chars）",
+      "technique": "EP",
+      "expected_result": "系统接受 用户名=11，处理成功",
+      "steps": "输入 用户名 = 11 | 提交请求 | 验证系统接受该输入并正常处理",
+      "test_data": "{\"用户名\": 11}",
+      "linked_req_ids": "FR-LOGIN-001",
+      "linked_coverage_ids": "COV-001",
+      "linked_strategy_id": "STR-001"
+    },
+    {
+      "case_id": "TC-002",
+      "title": "EP-无效类（下溢）：用户名 < 最小值（2 chars）",
+      "technique": "EP",
+      "expected_result": "系统拒绝 用户名=2，提示输入不合法",
+      "steps": "输入 用户名 = 2 | 提交请求 | 验证系统拒绝该输入并给出错误提示",
+      "test_data": "{\"用户名\": 2}",
+      "linked_req_ids": "FR-LOGIN-001",
+      "linked_coverage_ids": "COV-001",
+      "linked_strategy_id": "STR-001"
+    },
+    {
+      "case_id": "TC-003",
+      "title": "EP-无效类（上溢）：用户名 > 最大值（21 chars）",
+      "technique": "EP",
+      "expected_result": "系统拒绝 用户名=21，提示输入不合法",
+      "steps": "输入 用户名 = 21 | 提交请求 | 验证系统拒绝该输入并给出错误提示",
+      "test_data": "{\"用户名\": 21}",
+      "linked_req_ids": "FR-LOGIN-001",
+      "linked_coverage_ids": "COV-001",
+      "linked_strategy_id": "STR-001"
+    },
+    {
+      "case_id": "TC-004",
+      "title": "EP-无效类（空输入）：用户名 为空",
+      "technique": "EP",
+      "expected_result": "系统拒绝空 用户名，提示必填字段",
+      "steps": "不输入 用户名（留空） | 提交请求 | 验证系统拒绝并提示必填",
+      "test_data": "{\"用户名\": \"\"}",
+      "linked_req_ids": "FR-LOGIN-001",
+      "linked_coverage_ids": "COV-001",
+      "linked_strategy_id": "STR-001"
+    },
+    {
+      "case_id": "TC-005",
+      "title": "BVA-无效边界：用户名 = 下边界-1 (2 chars)",
+      "technique": "BVA",
+      "expected_result": "系统拒绝 用户名=2，提示输入超出范围",
+      "steps": "输入 用户名 = 2 | 提交请求 | 验证系统拒绝该越界值",
+      "test_data": "{\"用户名\": 2}",
+      "linked_req_ids": "FR-LOGIN-001",
+      "linked_coverage_ids": "COV-001",
+      "linked_strategy_id": "STR-002"
+    },
+    {
+      "case_id": "TC-006",
+      "title": "BVA-有效边界：用户名 = 下边界 (3 chars)",
+      "technique": "BVA",
+      "expected_result": "系统接受 用户名=3，处理成功",
+      "steps": "输入 用户名 = 3 | 提交请求 | 验证系统接受该边界值",
+      "test_data": "{\"用户名\": 3}",
+      "linked_req_ids": "FR-LOGIN-001",
+      "linked_coverage_ids": "COV-001",
+      "linked_strategy_id": "STR-002"
+    },
+    {
+      "case_id": "TC-007",
+      "title": "BVA-有效边界：用户名 = 下边界+1 (4 chars)",
+      "technique": "BVA",
+      "expected_result": "系统接受 用户名=4，处理成功",
+      "steps": "输入 用户名 = 4 | 提交请求 | 验证系统接受该边界值",
+      "test_data": "{\"用户名\": 4}",
+      "linked_req_ids": "FR-LOGIN-001",
+      "linked_coverage_ids": "COV-001",
+      "linked_strategy_id": "STR-002"
+    },
+    {
+      "case_id": "TC-008",
+      "title": "BVA-有效边界：用户名 = 上边界-1 (19 chars)",
+      "technique": "BVA",
+      "expected_result": "系统接受 用户名=19，处理成功",
+      "steps": "输入 用户名 = 19 | 提交请求 | 验证系统接受该边界值",
+      "test_data": "{\"用户名\": 19}",
+      "linked_req_ids": "FR-LOGIN-001",
+      "linked_coverage_ids": "COV-001",
+      "linked_strategy_id": "STR-002"
+    },
+    {
+      "case_id": "TC-009",
+      "title": "BVA-有效边界：用户名 = 上边界 (20 chars)",
+      "technique": "BVA",
+      "expected_result": "系统接受 用户名=20，处理成功",
+      "steps": "输入 用户名 = 20 | 提交请求 | 验证系统接受该边界值",
+      "test_data": "{\"用户名\": 20}",
+      "linked_req_ids": "FR-LOGIN-001",
+      "linked_coverage_ids": "COV-001",
+      "linked_strategy_id": "STR-002"
+    },
+    {
+      "case_id": "TC-010",
+      "title": "BVA-无效边界：用户名 = 上边界+1 (21 chars)",
+      "technique": "BVA",
+      "expected_result": "系统拒绝 用户名=21，提示输入超出范围",
+      "steps": "输入 用户名 = 21 | 提交请求 | 验证系统拒绝该越界值",
+      "test_data": "{\"用户名\": 21}",
+      "linked_req_ids": "FR-LOGIN-001",
+      "linked_coverage_ids": "COV-001",
+      "linked_strategy_id": "STR-002"
+    },
+    {
+      "case_id": "TC-011",
+      "title": "DT-规则1：✗ 密码连续错误超过5次",
+      "technique": "DT",
+      "expected_result": "条件未全部满足（密码连续错误超过5次），动作不触发或走替代分支",
+      "steps": "设置条件组合：✗ 密码连续错误超过5次 | 执行操作 | 验证系统按决策表规则响应",
+      "test_data": "{\"conditions\": {\"密码连续错误超过5次\": false}}",
+      "linked_req_ids": "FR-LOGIN-002",
+      "linked_coverage_ids": "COV-002",
+      "linked_strategy_id": "STR-003"
+    },
+    {
+      "case_id": "TC-012",
+      "title": "DT-规则2：✓ 密码连续错误超过5次",
+      "technique": "DT",
+      "expected_result": "则锁定该账户30分钟；限制登录或锁定账户",
+      "steps": "设置条件组合：✓ 密码连续错误超过5次 | 执行操作 | 验证系统按决策表规则响应",
+      "test_data": "{\"conditions\": {\"密码连续错误超过5次\": true}}",
+      "linked_req_ids": "FR-LOGIN-002",
+      "linked_coverage_ids": "COV-002",
+      "linked_strategy_id": "STR-003"
+    },
+    {
+      "case_id": "TC-013",
+      "title": "EP-动作验证：则锁定该账户30分钟（正常触发）",
+      "technique": "EP",
+      "expected_result": "动作「则锁定该账户30分钟」成功触发",
+      "steps": "构造满足触发条件的有效输入 | 执行操作 | 验证动作「则锁定该账户30分钟」被正确执行",
+      "test_data": "{\"trigger_condition\": \"满足\"}",
+      "linked_req_ids": "FR-LOGIN-002",
+      "linked_coverage_ids": "COV-003",
+      "linked_strategy_id": "STR-004"
+    },
+    {
+      "case_id": "TC-014",
+      "title": "EP-动作验证：则锁定该账户30分钟（条件不满足时不触发）",
+      "technique": "EP",
+      "expected_result": "动作「则锁定该账户30分钟」未触发，系统正常继续",
+      "steps": "构造不满足触发条件的输入 | 执行操作 | 验证动作「则锁定该账户30分钟」未被执行",
+      "test_data": "{\"trigger_condition\": \"不满足\"}",
+      "linked_req_ids": "FR-LOGIN-002",
+      "linked_coverage_ids": "COV-003",
+      "linked_strategy_id": "STR-004"
+    },
+    {
+      "case_id": "TC-015",
+      "title": "EP-动作验证：限制登录或锁定账户（正常触发）",
+      "technique": "EP",
+      "expected_result": "动作「限制登录或锁定账户」成功触发",
+      "steps": "构造满足触发条件的有效输入 | 执行操作 | 验证动作「限制登录或锁定账户」被正确执行",
+      "test_data": "{\"trigger_condition\": \"满足\"}",
+      "linked_req_ids": "FR-LOGIN-002",
+      "linked_coverage_ids": "COV-003",
+      "linked_strategy_id": "STR-004"
+    },
+    {
+      "case_id": "TC-016",
+      "title": "EP-动作验证：限制登录或锁定账户（条件不满足时不触发）",
+      "technique": "EP",
+      "expected_result": "动作「限制登录或锁定账户」未触发，系统正常继续",
+      "steps": "构造不满足触发条件的输入 | 执行操作 | 验证动作「限制登录或锁定账户」未被执行",
+      "test_data": "{\"trigger_condition\": \"不满足\"}",
+      "linked_req_ids": "FR-LOGIN-002",
+      "linked_coverage_ids": "COV-003",
+      "linked_strategy_id": "STR-004"
+    },
+    {
+      "case_id": "TC-017",
+      "title": "EP-动作验证：则锁定该账户30分钟（正常触发）",
+      "technique": "EP",
+      "expected_result": "动作「则锁定该账户30分钟」成功触发",
+      "steps": "构造满足触发条件的有效输入 | 执行操作 | 验证动作「则锁定该账户30分钟」被正确执行",
+      "test_data": "{\"trigger_condition\": \"满足\"}",
+      "linked_req_ids": "FR-LOGIN-002",
+      "linked_coverage_ids": "COV-004",
+      "linked_strategy_id": "STR-005"
+    },
+    {
+      "case_id": "TC-018",
+      "title": "EP-动作验证：则锁定该账户30分钟（条件不满足时不触发）",
+      "technique": "EP",
+      "expected_result": "动作「则锁定该账户30分钟」未触发，系统正常继续",
+      "steps": "构造不满足触发条件的输入 | 执行操作 | 验证动作「则锁定该账户30分钟」未被执行",
+      "test_data": "{\"trigger_condition\": \"不满足\"}",
+      "linked_req_ids": "FR-LOGIN-002",
+      "linked_coverage_ids": "COV-004",
+      "linked_strategy_id": "STR-005"
+    },
+    {
+      "case_id": "TC-019",
+      "title": "EP-动作验证：限制登录或锁定账户（正常触发）",
+      "technique": "EP",
+      "expected_result": "动作「限制登录或锁定账户」成功触发",
+      "steps": "构造满足触发条件的有效输入 | 执行操作 | 验证动作「限制登录或锁定账户」被正确执行",
+      "test_data": "{\"trigger_condition\": \"满足\"}",
+      "linked_req_ids": "FR-LOGIN-002",
+      "linked_coverage_ids": "COV-004",
+      "linked_strategy_id": "STR-005"
+    },
+    {
+      "case_id": "TC-020",
+      "title": "EP-动作验证：限制登录或锁定账户（条件不满足时不触发）",
+      "technique": "EP",
+      "expected_result": "动作「限制登录或锁定账户」未触发，系统正常继续",
+      "steps": "构造不满足触发条件的输入 | 执行操作 | 验证动作「限制登录或锁定账户」未被执行",
+      "test_data": "{\"trigger_condition\": \"不满足\"}",
+      "linked_req_ids": "FR-LOGIN-002",
+      "linked_coverage_ids": "COV-004",
+      "linked_strategy_id": "STR-005"
+    },
+    {
+      "case_id": "TC-021",
+      "title": "EP-通用功能验证：有效输入",
+      "technique": "EP",
+      "expected_result": "系统正常处理，结果符合需求",
+      "steps": "使用有效的典型输入执行功能 | 验证系统输出符合预期",
+      "test_data": "{\"input\": \"有效代表值\"}",
+      "linked_req_ids": "FR-LOGIN-003",
+      "linked_coverage_ids": "COV-005",
+      "linked_strategy_id": "STR-006"
+    },
+    {
+      "case_id": "TC-022",
+      "title": "EP-通用功能验证：无效输入",
+      "technique": "EP",
+      "expected_result": "系统拒绝无效输入并给出明确提示",
+      "steps": "使用无效/异常输入执行功能 | 验证系统给出适当错误处理",
+      "test_data": "{\"input\": \"无效代表值\"}",
+      "linked_req_ids": "FR-LOGIN-003",
+      "linked_coverage_ids": "COV-005",
+      "linked_strategy_id": "STR-006"
+    },
+    {
+      "case_id": "TC-023",
+      "title": "BVA-通用：关键输入的边界值探测",
+      "technique": "BVA",
+      "expected_result": "边界内值被接受，边界外值被拒绝",
+      "steps": "识别关键数值型输入的上下界 | 分别输入边界值及边界±1 | 验证系统对边界内外值的处理",
+      "test_data": "{\"boundary\": \"上下界 ±1\"}",
+      "linked_req_ids": "FR-LOGIN-003",
+      "linked_coverage_ids": "COV-006",
+      "linked_strategy_id": "STR-007"
+    },
+    {
+      "case_id": "TC-024",
+      "title": "DT-规则1：✗ 前置条件成立",
+      "technique": "DT",
+      "expected_result": "条件未全部满足（前置条件成立），动作不触发或走替代分支",
+      "steps": "设置条件组合：✗ 前置条件成立 | 执行操作 | 验证系统按决策表规则响应",
+      "test_data": "{\"conditions\": {\"前置条件成立\": false}}",
+      "linked_req_ids": "FR-LOGIN-003",
+      "linked_coverage_ids": "COV-006",
+      "linked_strategy_id": "STR-008"
+    },
+    {
+      "case_id": "TC-025",
+      "title": "DT-规则2：✓ 前置条件成立",
+      "technique": "DT",
+      "expected_result": "系统执行预期动作",
+      "steps": "设置条件组合：✓ 前置条件成立 | 执行操作 | 验证系统按决策表规则响应",
+      "test_data": "{\"conditions\": {\"前置条件成立\": true}}",
+      "linked_req_ids": "FR-LOGIN-003",
+      "linked_coverage_ids": "COV-006",
+      "linked_strategy_id": "STR-008"
+    }
+  ],
+  "risk": {
+    "requirements": [
+      {
+        "req_id": "FR-LOGIN-001",
+        "raw_text": "用户名长度必须在3到20个字符之间，仅允许字母与数字。",
+        "risk_score": 23.0,
+        "test_priority": "Low",
+        "risk_rationale": "含 1 处数据范围/边界约束；描述较短且无分支，风险略下调"
+      },
+      {
+        "req_id": "FR-LOGIN-002",
+        "raw_text": "如果密码连续错误超过5次，则锁定该账户30分钟。",
+        "risk_score": 69.0,
+        "test_priority": "Medium",
+        "risk_rationale": "文本含安全/账户/会话相关语义；识别到 1 条条件分支；识别到 2 条预期动作"
+      },
+      {
+        "req_id": "FR-LOGIN-003",
+        "raw_text": "用户成功登录后应跳转到个人资料页，会话超时时间为15分钟无操作。",
+        "risk_score": 72.0,
+        "test_priority": "High",
+        "risk_rationale": "文本含安全/账户/会话相关语义；来源标注为高优先级需求"
+      }
+    ],
+    "summary": {
+      "requirement_count": 3,
+      "case_count": 25,
+      "suite_count": 6,
+      "by_priority": {
+        "Low": 1,
+        "Medium": 1,
+        "High": 1
+      }
+    }
+  },
+  "traceability_summary": "共 25 条用例，覆盖 6 个覆盖项、8 条策略、3 条需求；技术分布：{'EP': 14, 'BVA': 7, 'DT': 4}",
+  "improvement_record_count": 0
+}

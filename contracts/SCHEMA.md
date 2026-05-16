@@ -1,8 +1,9 @@
-# AutoTestDesign JSON 契约（v1 — S0～S6）
+# AutoTestDesign JSON 契约（v1 — S0～S9）
 
 > **冻结规则**：字段只增不删。破坏性变更须发变更日志，并由契约负责人同步 `data/mock/` 与本文档。  
 > **S3～S4**：由 P2 维护（风险与覆盖项）。  
-> **S5～S6**：由 P3 维护（策略与黑盒用例生成）。
+> **S5～S6**：由 P3 维护（策略与黑盒用例生成）。  
+> **S7～S9**：由 P4 维护（可追溯、交互审查、导出）。
 
 ## 通用约定
 
@@ -296,3 +297,159 @@
 | `test_cases[].links.strategy` | string | 是 | 可追溯关联的策略 ID |
 
 **下游（P4）**：读取 `06_test_cases_draft.json`，消费 `test_cases` 进行用例优化、去重或格式化输出。
+
+---
+
+## S7 — `07_traceability.json`（`traceability_and_analysis.py` 输出）
+
+在 S6 基础上增加 **`traceability`**、**`analysis`** 与 **`improvement_records`**（**FR 6.0 前半 / Mainly 后段**）。
+
+```json
+{
+  "schema_version": "1.0",
+  "pipeline_stage": "07_traceability",
+  "traceability_analyzed_at": "2026-05-15T08:00:00Z",
+  "requirements": [],
+  "coverage_items": [],
+  "strategies": [],
+  "test_cases": [],
+  "traceability": {
+    "mappings": [
+      {
+        "case_id": "TC-001",
+        "title": "...",
+        "technique": "EP",
+        "strategy_id": "STR-001",
+        "coverage_ids": ["COV-001"],
+        "req_ids": ["FR-LOGIN-001"],
+        "strategy_technique": "EP"
+      }
+    ],
+    "req_to_cases": { "FR-LOGIN-001": ["TC-001"] },
+    "coverage_to_cases": { "COV-001": ["TC-001"] },
+    "strategy_to_cases": { "STR-001": ["TC-001"] },
+    "uncovered": {
+      "requirements": [],
+      "coverage_items": [],
+      "strategies": []
+    }
+  },
+  "analysis": {
+    "summary": "共 N 条用例…",
+    "technique_coverage": { "EP": 14, "BVA": 7, "DT": 4 },
+    "priority_distribution": { "High": 1, "Medium": 1, "Low": 1 },
+    "high_priority": {
+      "req_ids": ["FR-LOGIN-003"],
+      "linked_case_ids": ["TC-020"],
+      "case_count": 5
+    },
+    "gaps": ["待改进点描述"],
+    "recommendations": ["建议进入交互审查…"]
+  },
+  "improvement_records": [
+    {
+      "record_id": "IMP-001",
+      "at": "2026-05-15T08:00:00Z",
+      "author": "traceability_and_analysis.py",
+      "entity_type": "pipeline",
+      "entity_id": "S7",
+      "change_summary": "自动识别覆盖缺口",
+      "rationale": "…"
+    }
+  ]
+}
+```
+
+| 字段 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `pipeline_stage` | string | 建议 | 固定：`07_traceability` |
+| `traceability_analyzed_at` | string | 建议 | ISO8601 UTC |
+| `traceability.mappings` | array | 是 | 每条用例的追溯映射 |
+| `traceability.uncovered` | object | 建议 | 未被用例覆盖的需求/覆盖项/策略 |
+| `analysis` | object | 是 | 简要结果分析与缺口识别 |
+| `improvement_records` | array | 建议 | 改进记录（自动 + 后续人工追加） |
+
+**下游（P4 S8）**：读取 `07_traceability.json`，经交互审查后写出 `08_reviewed.json`。
+
+---
+
+## S8 — `08_reviewed.json`（`interactive_review.py` 输出）
+
+在 S7 基础上经设计者修订，字段与 S7 相同并**追加**审查元数据。
+
+| 字段 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `pipeline_stage` | string | 建议 | 固定：`08_reviewed` |
+| `reviewed_at` | string | 建议 | ISO8601 UTC |
+| `designer_edit_count` | number | 建议 | 人工修订次数 |
+| `review_notes` | string | 否 | 审查备注 |
+| `test_cases` | array | 是 | 可被修订的用例列表 |
+| `coverage_items` | array | 是 | 可被修订的覆盖项列表 |
+| `improvement_records` | array | 建议 | 含设计者追加的修订记录 |
+
+**下游（P4 S9）**：读取 `08_reviewed.json` 导出最终交付物。
+
+---
+
+## S9 — `09_export_cases.json`（`export_artifacts.py` 输出）
+
+面向测试管理与目标应用自动化的**最终导出**（**FR 6.0**）。可选同步写出 `09_export_cases.csv`、`09_export_risk.csv`。
+
+```json
+{
+  "schema_version": "1.0",
+  "pipeline_stage": "09_export",
+  "exported_at": "2026-05-15T08:05:00Z",
+  "suites": [
+    {
+      "suite_id": "SUITE-001",
+      "name": "High 优先级回归套件",
+      "priority": "High",
+      "case_ids": ["TC-020"],
+      "case_count": 5
+    }
+  ],
+  "cases": [
+    {
+      "case_id": "TC-001",
+      "title": "...",
+      "technique": "EP",
+      "expected_result": "...",
+      "steps": "步骤1 | 步骤2",
+      "test_data": "{}",
+      "linked_req_ids": "FR-LOGIN-001",
+      "linked_coverage_ids": "COV-001",
+      "linked_strategy_id": "STR-001"
+    }
+  ],
+  "risk": {
+    "requirements": [
+      {
+        "req_id": "FR-LOGIN-001",
+        "raw_text": "...",
+        "risk_score": 23.0,
+        "test_priority": "Low",
+        "risk_rationale": "..."
+      }
+    ],
+    "summary": {
+      "requirement_count": 3,
+      "case_count": 25,
+      "suite_count": 6,
+      "by_priority": { "High": 1, "Medium": 1, "Low": 1 }
+    }
+  },
+  "traceability_summary": "共 25 条用例…",
+  "improvement_record_count": 2
+}
+```
+
+| 字段 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `pipeline_stage` | string | 建议 | 固定：`09_export` |
+| `exported_at` | string | 建议 | ISO8601 UTC |
+| `suites` | array | 是 | 按优先级与技术分组的套件 |
+| `cases` | array | 是 | 扁平化用例（便于 CSV / 自动化消费） |
+| `risk` | object | 是 | 含 `requirements` 与 `summary` |
+
+**下游**：`tests_target/` 读取本文件对 `target-login-app` 执行自动化验收。

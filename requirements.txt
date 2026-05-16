@@ -1,2 +1,10 @@
 # P1：ingest / structure 仅使用 Python 3.10+ 标准库，无需额外依赖。
-# 下游若使用 spaCy / openai 等，请在此追加并锁定版本。
+# P4：tests_target 自动化测试
+pytest>=7.4.0
+requests>=2.31.0
+# web_app Web 前端（Flask + waitress，避免 Flask 内置开发服务器 WARNING）
+Flask>=3.0.0
+waitress>=3.0.0
+# 可选：S2/S3 --use-ai（OpenAI 兼容 API + 加载 .env）
+openai>=1.40.0
+python-dotenv>=1.0.0
